@@ -19,16 +19,11 @@ jobs:
         run: npx cap add android && npx cap sync android
       - name: App icon
         run: |
-          sudo apt-get install -y -qq imagemagick >/dev/null
           RES=android/app/src/main/res
           rm -rf $RES/mipmap-anydpi-v26
-          for d in mdpi:48 hdpi:72 xhdpi:96 xxhdpi:144 xxxhdpi:192; do
-            dir=$RES/mipmap-${d%%:*}; size=${d##*:}
-            convert build/icon.png -resize ${size}x${size} $dir/ic_launcher.png
-            cp $dir/ic_launcher.png $dir/ic_launcher_round.png
-          done
+          cp -r build/android-icons/* $RES/
       - name: Build APK
-        run: cd android && chmod +x gradlew && ./gradlew assembleDebug --no-daemon
+        run: cd android && chmod +x gradlew && ./gradlew assembleDebug --no-daemon --stacktrace
       - uses: actions/upload-artifact@v4
         with:
           name: SapphireStock-android
