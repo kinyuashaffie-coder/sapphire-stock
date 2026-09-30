@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src https://otsfvvngknthptlvdfhb.supabase.co wss://otsfvvngknthptlvdfhb.supabase.co; img-src 'self' data:">
+<meta name="theme-color" content="#0f52ba">
+<title>Sapphire Stock</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="bootView" class="boot"><div class="logo"><span class="gem">◆</span> Sapphire</div><p class="muted">Loading…</p></div>
+
+<div id="loginView" class="login hide">
+  <form id="loginForm" autocomplete="on">
+    <div class="logo"><span class="gem">◆</span> Sapphire</div>
+    <p class="muted">Bar stock. Sign in to continue.</p>
+    <label class="fld"><span>Username</span><input name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>
+    <label class="fld"><span>Password</span><input name="password" type="password" autocomplete="current-password" required></label>
+    <div class="err" id="loginErr" role="alert"></div>
+    <button class="btn primary wide" id="loginBtn">Sign in</button>
+  </form>
+</div>
+
+<div id="appView" class="hide">
+  <header class="top"><div class="wrap">
+    <div class="brand"><span class="gem">◆</span> Sapphire<small>Stock</small></div>
+    <div class="sync" id="sync" role="status"><span class="dot"></span><span id="syncTxt">Connecting…</span></div>
+    <div class="who"><span id="whoName"></span>
+      <button class="btn ghost" id="pwBtn" type="button">Password</button>
+      <button class="btn ghost" id="logoutBtn" type="button">Sign out</button></div>
+  </div></header>
+
+  <main class="wrap">
+    <section class="strip" id="strip" aria-label="Summary"></section>
+
+    <nav class="tabs" role="tablist" id="tabs">
+      <button role="tab" data-tab="count" data-need="count">Stock count</button>
+      <button role="tab" data-tab="deliveries">Deliveries</button>
+      <button role="tab" data-tab="products">Products</button>
+      <button role="tab" data-tab="reports" data-need="reports">Reports</button>
+      <button role="tab" data-tab="changes" data-need="admin">Changes <span class="badge hide" id="unseenBadge"></span></button>
+      <button role="tab" data-tab="users" data-need="admin">Accounts</button>
+    </nav>
+
+    <!-- stock count -->
+    <section id="tab-count" data-panel class="hide">
+      <p class="note" id="countNote"></p>
+      <div class="bar">
+        <input class="search" id="qCount" type="search" placeholder="Search products" aria-label="Search products">
+        <div class="chips" id="chipsCount"></div>
+      </div>
+      <div class="rows" id="countRows"></div>
+      <div class="closebar" id="closebar"></div>
+    </section>
+
+    <!-- deliveries -->
+    <section id="tab-deliveries" data-panel class="hide">
+      <div class="bar">
+        <p class="note grow">Stock that arrives, or stock that leaves without being sold (breakages, spoilt, staff use). These fill in "Received" and "Removed" on the count.</p>
+        <button class="btn primary" id="addMove" data-need="receive" type="button">Record delivery</button>
+      </div>
+      <div class="panel scroll"><table class="grid">
+        <thead><tr><th>Product</th><th>Type</th><th class="n">Qty</th><th>When</th><th>By</th><th>Note</th><th></th></tr></thead>
+        <tbody id="moveBody"></tbody>
+      </table></div>
+    </section>
+
+    <!-- products -->
+    <section id="tab-products" data-panel class="hide">
+      <div class="bar">
+        <input class="search" id="qProd" type="search" placeholder="Search products" aria-label="Search products">
+        <button class="btn primary" id="addProd" data-need="add_products" type="button">Add product</button>
+      </div>
+      <div class="chips" id="chipsProd"></div>
+      <div class="panel scroll"><table class="grid">
+        <thead id="prodHead"></thead>
+        <tbody id="prodBody"></tbody>
+      </table></div>
+    </section>
+
+    <!-- reports -->
+    <section id="tab-reports" data-panel class="hide">
+      <div class="bar">
+        <select id="repRange" aria-label="Period">
+          <option value="month">This month</option>
+          <option value="3m">Last 3 months</option>
+          <option value="all" selected>All time</option>
+        </select>
+        <span class="note grow" id="repTotals"></span>
+      </div>
+      <div class="panel scroll"><table class="grid">
+        <thead id="repHead"></thead>
+        <tbody id="repBody"></tbody>
+      </table></div>
+      <div id="repDetail"></div>
+    </section>
+
+    <!-- changes -->
+    <section id="tab-changes" data-panel class="hide">
+      <div class="bar">
+        <p class="note grow">Every count, delivery, product and account change, with who did it. Highlighted rows are new since you last reviewed.</p>
+        <select id="chUser" aria-label="Filter by person"><option value="">Everyone</option></select>
+        <label class="chk"><input type="checkbox" id="chNew"> New only</label>
+        <button class="btn primary" id="markSeen" type="button">Mark all reviewed</button>
+      </div>
+      <div class="panel scroll"><table class="grid">
+        <thead><tr><th>When</th><th>Who</th><th>What</th><th>Product</th><th>Change</th></tr></thead>
+        <tbody id="chBody"></tbody>
+      </table></div>
+    </section>
+
+    <!-- accounts -->
+    <section id="tab-users" data-panel class="hide">
+      <div class="bar">
+        <p class="note grow">Create an account for each person and switch on only what they need. Changes apply immediately, on every device.</p>
+        <button class="btn primary" id="addUser" type="button">Add account</button>
+      </div>
+      <div class="panel scroll"><table class="grid">
+        <thead><tr><th>Name</th><th>Can</th><th>Status</th><th></th></tr></thead>
+        <tbody id="userBody"></tbody>
+      </table></div>
+    </section>
+    <footer>Sapphire Stock</footer>
+  </main>
+</div>
+
+<!-- dialogs -->
+<dialog id="dlgProd"><form method="dialog" id="fProd">
+  <h3 id="dlgProdTitle">Add product</h3>
+  <label class="fld"><span>Name</span><input name="name" required maxlength="80"></label>
+  <label class="fld"><span>Category</span><input name="category" list="catList" required maxlength="40"></label>
+  <datalist id="catList"></datalist>
+  <div class="two">
+    <label class="fld" data-need="see_prices"><span>Buying price</span><input name="buy" type="number" min="0" step="any" inputmode="decimal"></label>
+    <label class="fld"><span>Selling price</span><input name="sell" type="number" min="0" step="any" inputmode="decimal"></label>
+  </div>
+  <label class="fld" id="openFld"><span>Stock on hand now</span><input name="opening" type="number" min="0" step="any" inputmode="decimal" value="0"></label>
+  <div class="two edit-only">
+    <label class="fld"><span>Reorder when stock is at or below</span><input name="reorder" type="number" min="0" step="any" inputmode="decimal"></label>
+    <label class="chk fld-chk"><input type="checkbox" name="active"> Active (shown in counts)</label>
+  </div>
+  <div class="err" role="alert"></div>
+  <div class="dlg-actions"><span class="grow"></span>
+    <button class="btn" value="cancel" formnovalidate>Cancel</button>
+    <button class="btn primary" value="ok">Save product</button></div>
+</form></dialog>
+
+<dialog id="dlgMove"><form method="dialog" id="fMove">
+  <h3>Record delivery</h3>
+  <label class="fld"><span>Product</span><input name="product" list="prodList" required autocomplete="off" placeholder="Start typing…"></label>
+  <datalist id="prodList"></datalist>
+  <div class="two">
+    <label class="fld"><span>Type</span><select name="type"><option value="in">Received</option><option value="out">Removed (not sold)</option></select></label>
+    <label class="fld"><span>Quantity</span><input name="qty" type="number" min="0.01" step="any" inputmode="decimal" value="1" required></label>
+  </div>
+  <div class="admin-only">
+    <label class="fld"><span>Unit cost (optional)</span><input name="cost" type="number" min="0" step="any" inputmode="decimal"></label>
+    <label class="chk fld-chk"><input type="checkbox" name="updCost"> Update the product's buying price to this cost</label>
+  </div>
+  <label class="fld"><span>Note (optional)</span><input name="note" maxlength="120" placeholder="Supplier, receipt no., reason…"></label>
+  <div class="err" role="alert"></div>
+  <div class="dlg-actions"><span class="grow"></span>
+    <button class="btn" value="cancel" formnovalidate>Cancel</button>
+    <button class="btn primary" value="ok">Save delivery</button></div>
+</form></dialog>
+
+<dialog id="dlgUser"><form method="dialog" id="fUser">
+  <h3 id="dlgUserTitle">Add account</h3>
+  <div class="two">
+    <label class="fld"><span>Full name</span><input name="full_name" maxlength="80"></label>
+    <label class="fld"><span>Username</span><input name="username" autocapitalize="none" spellcheck="false" pattern="[a-z0-9._\-]{3,30}" title="3–30 lowercase letters, numbers, dots, dashes" required></label>
+  </div>
+  <div class="two">
+    <label class="fld"><span id="pwLbl">Password (at least 8 characters)</span><input name="password" type="text" minlength="8" maxlength="72" autocomplete="off"></label>
+    <label class="fld"><span>Role</span><select name="role"><option value="worker">Worker (limited)</option><option value="admin">Admin (everything)</option></select></label>
+  </div>
+  <fieldset class="perm-grid" id="permGrid"><legend>Worker is allowed to</legend></fieldset>
+  <label class="chk fld-chk edit-only"><input type="checkbox" name="active"> Account active (untick to block sign-in)</label>
+  <div class="err" role="alert"></div>
+  <div class="dlg-actions"><span class="grow"></span>
+    <button class="btn" value="cancel" formnovalidate>Cancel</button>
+    <button class="btn primary" value="ok">Save account</button></div>
+</form></dialog>
+
+<dialog id="dlgClose"><form method="dialog" id="fClose">
+  <h3>Save report &amp; start new stock take</h3>
+  <p class="muted" id="closeInfo"></p>
+  <label class="fld"><span>Name for this stock take</span><input name="closed" required maxlength="60"></label>
+  <label class="fld"><span>Name for the new stock take</span><input name="next" required maxlength="60"></label>
+  <div class="err" role="alert"></div>
+  <div class="dlg-actions"><span class="grow"></span>
+    <button class="btn" value="cancel" formnovalidate>Cancel</button>
+    <button class="btn warn" value="ok">Save &amp; start new</button></div>
+</form></dialog>
+
+<dialog id="dlgPw"><form method="dialog" id="fPw">
+  <h3>Change password</h3>
+  <p class="muted" id="pwForced">Please choose your own password before continuing.</p>
+  <label class="fld"><span>Current password</span><input name="old" type="password" required autocomplete="current-password"></label>
+  <label class="fld"><span>New password (at least 8 characters)</span><input name="new" type="password" minlength="8" required autocomplete="new-password"></label>
+  <label class="fld"><span>Repeat new password</span><input name="new2" type="password" minlength="8" required autocomplete="new-password"></label>
+  <div class="err" role="alert"></div>
+  <div class="dlg-actions"><span class="grow"></span>
+    <button class="btn" value="cancel" formnovalidate id="pwCancel">Cancel</button>
+    <button class="btn primary" value="ok">Save password</button></div>
+</form></dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="vendor/supabase.js"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

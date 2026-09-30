@@ -1,0 +1,7 @@
+{
+  "appId": "com.sapphire.stock",
+  "appName": "Sapphire Stock",
+  "webDir": "web",
+  "server": { "androidScheme": "https" },
+  "android": { "backgroundColor": "#f3f5fa" }
+}

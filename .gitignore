@@ -1,0 +1,7 @@
+node_modules/
+release/
+android/
+*.log
+# contain the first admin password and business data
+supabase/seed.sql
+SAPPHIRE-DATABASE-SETUP.sql
